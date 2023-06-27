@@ -1,0 +1,89 @@
+<script>
+const TIKI_SETTINGS = {
+    UI : {
+        preview : "{{ block.settings.preview }}",
+        primaryTextColor : "{{ block.settings.primaryTextColor }}",
+        secondaryTextColor : "{{ block.settings.secondaryTextColor }}",
+        primaryBackgroundColor : "{{ block.settings.primaryBackgroundColor }}",
+        secondaryBackgroundColor : "{{ block.settings.secondaryBackgroundColor }}",
+        accentColor : "{{ block.settings.accentColor }}",
+        fontFamily : "{{ block.settings.fontFamily }}",
+        description : "{{ block.settings.description }}",
+        offerImage : "{{ block.settings.offerImage }}",
+        isUsed1 : "{{ block.settings.isUsed1 }}",
+        useCase1 : "{{ block.settings.useCase1 }}",
+        isUsed2 : "{{ block.settings.isUsed2 }}",
+        useCase2 : "{{ block.settings.useCase2 }}",
+        isUsed3 : "{{ block.settings.isUsed3 }}",
+        useCase3 : "{{ block.settings.useCase3 }}",
+        terms : "{{ block.settings.terms }}"
+    },
+    discount: {
+        amount: "10",//"{{ app.metafields.mytiki.discount.amount }}",
+        type: "percent",//"{{ app.metafields.mytiki.discount.type }}",
+        description: "",//"{{ app.metafields.mytiki.discount.description }}",
+        expiry: undefined,//"{{ app.metafields.mytiki.discount.expiry }}",
+        reference: "tid",//"{{ app.metafields.mytiki.discount.tid }}",
+    },
+    publishingId: "e12f5b7b-6b48-4503-8b39-28e4995b5f88" //{{ app.metafields.tiki_keys.tiki_public_key }}
+}
+</script>
+{% # theme-check-disable AssetSizeJavaScript %}
+<script async src="https://unpkg.com/@mytiki/tiki-sdk-js@2.1.2/dist/index.js"></script>
+{% # theme-check-enable AssetSizeJavaScript %}
+<script async src="{{ 'tiki_shopify.js' | asset_url }}"></script>
+<style>
+    :root {
+        --tiki-font-size-xs: calc(16px * 0.75);
+        --tiki-font-size-sm: calc(16px * 0.875);
+        --tiki-font-size: calc(16px * 1);
+        --tiki-font-size-lg: calc(16px * 1.125);
+        --tiki-font-size-xl: calc(16px * 1.25);
+        
+        --tiki-line-height-xs: calc(16px * 1);
+        --tiki-line-height-sm: calc(16px * 1.25);
+        --tiki-line-height: calc(16px * 1.5);
+        --tiki-line-height-lg: calc(16px * 1.75);
+        --tiki-line-height-xl: calc(16px * 1.75);
+
+        --page-width: calc(16px * 160);
+        --product-card-corner-radius: calc(16px * 0.4);
+        --product-card-shadow-blur-radius: calc(16px * 1.0);
+        --collection-card-corner-radius: calc(16px * 0.4);
+        --collection-card-shadow-vertical-offset: calc(16px * 0.4);
+        --collection-card-shadow-blur-radius: calc(16px * 0.5);
+        --blog-card-shadow-vertical-offset: calc(16px * 0.4);
+        --blog-card-shadow-blur-radius: calc(16px * 0.5);
+        --badge-corner-radius: calc(16px * 4.0);
+    }
+    .tiki-back-btn{
+        height:16px!important;
+    }
+</style>
+
+{% schema %}
+{
+  "name": "TIKI",
+  "target": "body",
+  "settings": [
+    { "type": "header", "content": "Banner Settings" },
+    { "type": "checkbox", "id": "preview", "label": "Preview Banner", "default": false },
+    { "type": "color", "id": "primaryTextColor", "label": "PrimaryTextColor", "default": "#1C0000" },
+    { "type": "color", "id": "secondaryTextColor", "label": "SecondaryTextColor", "default": "#00001C" },
+    { "type": "color", "id": "primaryBackgroundColor", "label": "PrimaryBackgroundColor", "default": "#FFFFFF" },
+    { "type": "color", "id": "secondaryBackgroundColor", "label": "SecondaryBackgroundColor", "default": "#F6F6F6" },
+    { "type": "color", "id": "accentColor", "label": "AccentColor", "default": "#00b272" },
+    { "type": "header", "content": "Offer Settings"  },
+    { "type": "text", "id": "description", "label": "Description", "default": "desc", "info":"Small text to add user-friendly details to the Offer. We recommend including details like the type of data the user is trading and participation requirements (like 10% off your next purchase of $10 or more)." },
+    { "type": "image_picker", "id": "offerImage", "label": "Offer image", "info":"A 300 x 86 resolution image that ilustrates the offer. We've elected to make this portion of the UI an image so you can get as fancy/detailed as you'd like. We strongly recommend the image to be compelling, easy to understand, and focused on the incentive for the user to participate (hence, why it's called the reward image). The reward always goes hand in hand with the text Description (like a caption), so avoid over crowding it with too much text." },
+    { "type": "checkbox", "id": "isUsed1", "label": "Is Used", "default": true, "info":"Is the use case 1 used?" },
+    { "type": "text", "id": "useCase1", "label": "Offer use case 1", "default": "Use case 1", "info":"Short statement for users on how their data will be used or not used, using familiar terms to enhance understanding and trust." },
+    { "type": "checkbox", "id": "isUsed2", "label": "Is Used", "default": true, "info":"Is the use case 2 used?" },
+    { "type": "text", "id": "useCase2", "label": "Offer use case 2", "default": "Use case 2", "info":"Short statement for users on how their data will be used or not used, using familiar terms to enhance understanding and trust." },
+    { "type": "checkbox", "id": "isUsed3", "label": "Is Used", "default": true, "info":"Is the use case 3 used?" },
+    { "type": "text", "id": "useCase3", "label": "Offer use case 3", "default": "Use case 3", "info":"Short statement for users on how their data will be used or not used, using familiar terms to enhance understanding and trust." },
+    { "type": "richtext", "id": "terms", "label": "Terms", "default": "<p>terms</p>", "info":"The terms and conditions URL for this offer agreement. It should be a URL to a plain text file containing the legal conditions. This file can include simple markdown format." }
+  ]
+}
+{% endschema %}
+

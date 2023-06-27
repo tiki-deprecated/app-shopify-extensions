@@ -1,0 +1,46 @@
+query Input {
+  cart {
+    buyerIdentity {
+        customer {
+            discountAllowed: metafield(namespace: "mytiki", key: "discount_allowed"){
+                value
+            }
+            discountUsed: metafield(namespace: "mytiki", key: "discount_used"){
+                value
+            }
+        }
+
+    }
+    cost {
+        subtotalAmount {
+            amount
+        }
+    }
+    lines {
+      quantity
+    }
+  }
+  discountNode {
+    tid: metafield(namespace: "mytiki", key: "tid"){
+      value
+    }
+    discountType: metafield(namespace: "mytiki", key: "discountType"){
+      value
+    }
+    discountValue: metafield(namespace: "mytiki", key: "discountValue"){
+      value
+    }
+    minValue: metafield(namespace: "mytiki", key: "minValue"){
+      value
+    }
+    minQty: metafield(namespace: "mytiki", key: "minQty"){
+      value
+    }
+    maxUse: metafield(namespace: "mytiki", key: "maxUse"){
+      value
+    }
+    onePerUser: metafield(namespace: "mytiki", key: "onePerUser"){
+      value
+    }
+  }
+}

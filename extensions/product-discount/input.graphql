@@ -1,0 +1,61 @@
+query Input($selectedCollectionIds: [ID!]){
+
+  cart {
+    lines {
+      id
+      quantity
+      merchandise {
+        ... on ProductVariant {
+          id
+          product {
+            inAnyCollection(ids: $selectedCollectionIds)
+          }
+        }
+      }
+      cost{
+        subtotalAmount{
+            amount
+        }
+      }
+    }
+    buyerIdentity {
+        customer {
+            discountAllowed: metafield(namespace: "mytiki", key: "discount_allowed"){
+                value
+            }
+            discountUsed: metafield(namespace: "mytiki", key: "discount_used"){
+                value
+            }
+        }
+    }
+  }
+  discountNode {
+    tid: metafield(namespace: "mytiki", key: "tid"){
+      value
+    }
+    discountType: metafield(namespace: "mytiki", key: "discountType"){
+      value
+    }
+    discountValue: metafield(namespace: "mytiki", key: "discountValue"){
+      value
+    }
+    minValue: metafield(namespace: "mytiki", key: "minValue"){
+      value
+    }
+    minQty: metafield(namespace: "mytiki", key: "minQty"){
+      value
+    }
+    maxUse: metafield(namespace: "mytiki", key: "maxUse"){
+      value
+    }
+    onePerUser: metafield(namespace: "mytiki", key: "onePerUser"){
+      value
+    }
+    products: metafield(namespace: "mytiki", key: "products"){
+      value
+    }
+    collections: metafield(namespace: "mytiki", key: "collections"){
+      value
+    }
+  }
+}
