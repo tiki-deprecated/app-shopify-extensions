@@ -7,6 +7,7 @@ import {
   Value,
   ProductVariant,
 } from "../generated/api";
+import { ShopifyDiscountMeta } from "./shopify-discount-meta";
 
 const EMPTY_DISCOUNT: FunctionResult = {
   discountApplicationStrategy: DiscountApplicationStrategy.First,
@@ -19,19 +20,18 @@ const isDiscountAllowed = (input: InputQuery) => {
     return !discountAllowed || JSON.parse(discountAllowed).indexOf(tid) === -1
 }
 
-const isAlreadyUsed = (input: InputQuery) => {
-    const onePerUser: string | undefined = input.discountNode.onePerUser?.value
+const isAlreadyUsed = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
     const tid: string = input.discountNode.tid!.value
-    if( onePerUser ){
+    if( discountMeta.onePerUser ){
         const discounUsed = input.cart.buyerIdentity?.customer?.discountUsed?.value ?? '[]'
         return JSON.parse(discounUsed).indexOf(tid) === -1
     }
     return false
 }
 
-const setDiscountValue = (input: InputQuery) => {
-    const discountType = input.discountNode.discountType!.value
-    const discountValue: number = Number(input.discountNode.discountValue!.value)
+const setDiscountValue = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
+    const discountType = discountMeta.discountType
+    const discountValue: number = Number(discountMeta.discountValue)
     switch(discountType) {
         case 'percentage':
             return {
@@ -47,11 +47,11 @@ const setDiscountValue = (input: InputQuery) => {
     throw Error(`Invalid discount type ${discountType}` )
 }
 
-const setTargets = (input: InputQuery) => {
+const setTargets = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
     let targets: Target[] = []
     const products: string[] = JSON.parse(input.discountNode.products?.value ?? '[]')
-    const minQty: number = Number(input.discountNode.minQty?.value ?? '0')
-    const minValue: number = Number(input.discountNode.minValue?.value ?? '0')
+    const minQty: number = Number(discountMeta.minQty)
+    const minValue: number = Number(discountMeta.minValue)
     for(let line of input.cart.lines){
        if(
         products.indexOf(line.id) > -1 &&
@@ -69,11 +69,12 @@ const setTargets = (input: InputQuery) => {
 
 export default (input: InputQuery): FunctionResult => {
     try{
-        if(!isDiscountAllowed(input) || isAlreadyUsed(input)){
+        const discountMeta: ShopifyDiscountMeta = JSON.parse(input.discountNode.discount_meta!.value)
+        if(!isDiscountAllowed(input) || isAlreadyUsed(input,discountMeta)){
             return EMPTY_DISCOUNT
         }
-        const targets: Array<Target> = setTargets(input)
-        const value: Value = setDiscountValue(input)
+        const targets: Array<Target> = setTargets(input, discountMeta)
+        const value: Value = setDiscountValue(input, discountMeta)
         const discount: Discount = {
             targets,
             value

@@ -9,6 +9,7 @@ import {
   OrderSubtotalTarget,
   Value,
 } from "../generated/api";
+import { ShopifyDiscountMeta } from "./shopify-discount-meta";
 
 const EMPTY_DISCOUNT: FunctionResult = {
   discountApplicationStrategy: DiscountApplicationStrategy.First,
@@ -85,16 +86,3 @@ export default (input: InputQuery): FunctionResult => {
         return EMPTY_DISCOUNT
     }
 };
-
-export interface ShopifyDiscountMeta {
-    type: string;
-    description: string;
-    discountType: string;
-    discountValue: number;
-    minValue: number;
-    minQty: number;
-    maxUse: number;
-    onePerUser: boolean;
-    products: string[];
-    collections: string[];
-  }
