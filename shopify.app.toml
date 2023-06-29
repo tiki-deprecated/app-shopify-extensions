@@ -3,4 +3,4 @@
 name = "TIKI"
 scopes = "read_orders,write_discounts"
 extension_directories = ["extensions/*"]
-web_directories = ["web/*"]
+web_directories = ["web"]

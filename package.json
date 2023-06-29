@@ -18,6 +18,7 @@
   "author": "TIKI Inc",
   "private": true,
   "workspaces": [
+    "web",
     "extensions/*"
   ]
 }
