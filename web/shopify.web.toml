@@ -1,4 +1,7 @@
-type="backend"
+type="frontend"
+
+auth_callback_path = ["api/latest/oauth/token"]
+webhooks_path = "/api/latest/"
 
 [commands]
 dev = "npm run dev"
