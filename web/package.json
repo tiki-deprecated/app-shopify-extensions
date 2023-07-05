@@ -8,7 +8,7 @@
     "start": "node dist/index.js",
     "dev": "concurrently -n backend,frontend,dev-server \"npm run dev-backend\" \"npm run dev-frontend\" \"npm run build && npm run start\"",
     "dev-backend": "cd backend && npm run start",
-    "dev-frontend": "cd frontend && npm run start",
+    "dev-frontend": "cd frontend && npm run static",
     "dev2": "concurrently \"npm run dev-backend\" \"npm run dev-frontend\" \"npx tsc --watch\" \"nodemon -q dist/index.js\""
   },
   "author": "The TIKI Team",
