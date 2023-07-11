@@ -19,17 +19,17 @@ const TIKI_SETTINGS = {
         terms : "{{ block.settings.terms }}"
     },
     discount: {
-        amount: "10",//"{{ app.metafields.mytiki.discount.amount }}",
-        type: "percent",//"{{ app.metafields.mytiki.discount.type }}",
-        description: "",//"{{ app.metafields.mytiki.discount.description }}",
-        expiry: undefined,//"{{ app.metafields.mytiki.discount.expiry }}",
-        reference: "tid",//"{{ app.metafields.mytiki.discount.tid }}",
+        amount: "{{ app.metafields.mytiki.discount.amount }}",
+        type: "{{ app.metafields.mytiki.discount.type }}",
+        description: "{{ app.metafields.mytiki.discount.description }}",
+        expiry: "{{ app.metafields.mytiki.discount.expiry }}",
+        reference: "{{ app.metafields.mytiki.discount.tid }}",
     },
     publishingId: "e12f5b7b-6b48-4503-8b39-28e4995b5f88" //{{ app.metafields.tiki_keys.tiki_public_key }}
 }
 </script>
 {% # theme-check-disable AssetSizeJavaScript %}
-<script async src="https://unpkg.com/@mytiki/tiki-sdk-js@2.1.2/dist/index.js"></script>
+<script async src="https://unpkg.com/@mytiki/tiki-sdk-js@2.1.3/dist/index.js"></script>
 {% # theme-check-enable AssetSizeJavaScript %}
 <script async src="{{ 'tiki_shopify.js' | asset_url }}"></script>
 <style>
