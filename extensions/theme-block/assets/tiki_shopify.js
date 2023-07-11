@@ -162,7 +162,7 @@ window.addEventListener('load', async (event) => {
         tikiAnon()
     }
   } else {
-    if (!Shopify.designMode || TIKI_SETTINGS.preview === 'true') {
+    if (!Shopify.designMode || TIKI_SETTINGS.UI.preview === 'true') {
       tikiSdkConfig().add()
       tikiAnon()
     }
