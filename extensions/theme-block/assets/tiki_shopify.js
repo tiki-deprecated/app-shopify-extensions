@@ -185,14 +185,13 @@ const tikiHandleDecision = async (accepted) => {
             offer._description,
             offer._expiry
         )
-        const discountId = TIKI_SETTINGS.discount.reference
         const payable = await TikiSdk.Trail.Payable.create(
             license.id,
             TIKI_SETTINGS.discount.amount,
             TIKI_SETTINGS.discount.type,
             TIKI_SETTINGS.discount.description,
             TIKI_SETTINGS.discount.expiry,
-            discountId
+            TIKI_SETTINGS.discount.reference,
         )
         if(payable){
             tikiSaveCustomerDiscount(customerId, discountId)

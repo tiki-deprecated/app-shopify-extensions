@@ -18,13 +18,7 @@ const TIKI_SETTINGS = {
         useCase3 : "{{ block.settings.useCase3 }}",
         terms : "{{ block.settings.terms }}"
     },
-    discount: {
-        amount: "{{ app.metafields.mytiki.discount.amount }}",
-        type: "{{ app.metafields.mytiki.discount.type }}",
-        description: "{{ app.metafields.mytiki.discount.description }}",
-        expiry: "{{ app.metafields.mytiki.discount.expiry }}",
-        reference: "{{ app.metafields.mytiki.discount.tid }}",
-    },
+    discount: {{ app.metafields.mytiki.discount }},
     publishingId: "{{ app.metafields.mytiki.public_key_id }}"
 }
 </script>
