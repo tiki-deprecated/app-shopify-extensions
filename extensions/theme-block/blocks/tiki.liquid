@@ -9,7 +9,7 @@ const TIKI_SETTINGS = {
         accentColor : "{{ block.settings.accentColor }}",
         fontFamily : "{{ block.settings.fontFamily }}",
         description : "{{ block.settings.description }}",
-        offerImage : "{{ block.settings.offerImage | img_url }}",
+        offerImage : "{{ block.settings.offerImage | image_url }}",
         isUsed1 : "{{ block.settings.isUsed1 }}",
         useCase1 : "{{ block.settings.useCase1 }}",
         isUsed2 : "{{ block.settings.isUsed2 }}",
@@ -19,7 +19,7 @@ const TIKI_SETTINGS = {
         terms : "{{ block.settings.terms }}"
     },
     discount: {{ app.metafields.mytiki.discount }},
-    publishingId: "{{ app.metafields.mytiki.public_key_id }}"
+    publishingId: "e12f5b7b-6b48-4503-8b39-28e4995b5f88" //{{ app.metafields.tiki_keys.tiki_public_key }}
 }
 </script>
 {% # theme-check-disable AssetSizeJavaScript %}

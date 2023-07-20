@@ -53,7 +53,7 @@ const tikiAnon = () => {
   }
 }
 
-const tikiAnonGoTo = (step) => {
+const tikiAnonGoTo = async (step) => {
   switch (step) {
     case 'none': {
       const element = document.getElementById(tikiId)
@@ -91,9 +91,10 @@ const tikiAnonGoTo = (step) => {
       break
     }
     case 'terms': {
-      const terms = TikiSdk.UI.Screen.Terms.create(
+      const terms = await TikiSdk.UI.Screen.Terms.create(
         {
-          src: TikiSdk.config()._offers[0]._terms
+          src: TikiSdk.config()._offers[0]._terms.src,
+          isHtml: true
         },
         async () => {
           if (!Shopify.designMode){
