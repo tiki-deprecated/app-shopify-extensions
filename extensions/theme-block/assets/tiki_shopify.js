@@ -140,9 +140,9 @@ const tikiSdkConfig = () => {
     .offer
     .description(TIKI_SETTINGS.UI.description)
     .reward(TIKI_SETTINGS.UI.offerImage)
-    .bullet({ text: TIKI_SETTINGS.UI.useCase1, isUsed: TIKI_SETTINGS.UI.isUsed1 })
-    .bullet({ text: TIKI_SETTINGS.UI.useCase2, isUsed: TIKI_SETTINGS.UI.isUsed2 })
-    .bullet({ text: TIKI_SETTINGS.UI.useCase3, isUsed: TIKI_SETTINGS.UI.isUsed3 })
+    .bullet(TIKI_SETTINGS.UI.bullet1)
+    .bullet(TIKI_SETTINGS.UI.bullet2)
+    .bullet(TIKI_SETTINGS.UI.bullet3)
     .terms(TIKI_SETTINGS.UI.terms)
     .tag(TikiSdk.Trail.Title.TitleTag.deviceId())
     .use({ usecases: [TikiSdk.Trail.License.LicenseUsecase.attribution()], destinations: ['*'] })
