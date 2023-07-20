@@ -1,6 +1,6 @@
 type="frontend"
 
-auth_callback_path = ["api/latest/oauth/token"]
+auth_callback_path = ["/api/latest/oauth/authorize", "api/latest/oauth/token"]
 webhooks_path = "/api/latest/"
 
 [commands]
