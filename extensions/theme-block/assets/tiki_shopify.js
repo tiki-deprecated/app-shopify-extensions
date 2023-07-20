@@ -182,7 +182,7 @@ const tikiHandleDecision = async (accepted) => {
         let license = await TikiSdk.Trail.License.create(
             title.id,
             accepted ? offer._uses : [],
-            offer._terms,
+            offer._terms.src,
             offer._description,
             offer._expiry
         )

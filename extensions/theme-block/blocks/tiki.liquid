@@ -16,7 +16,7 @@ const TIKI_SETTINGS = {
         terms : "{{ block.settings.terms }}"
     },
     discount: {{ app.metafields.mytiki.discount }},
-    publishingId: "e12f5b7b-6b48-4503-8b39-28e4995b5f88" //{{ app.metafields.tiki_keys.tiki_public_key }}
+    publishingId: {{ app.metafields.tiki_keys.tiki_public_key }}
 }
 </script>
 {% # theme-check-disable AssetSizeJavaScript %}
