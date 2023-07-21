@@ -53,7 +53,7 @@ const tikiAnon = () => {
   }
 }
 
-const tikiAnonGoTo = (step) => {
+const tikiAnonGoTo = async (step) => {
   switch (step) {
     case 'none': {
       const element = document.getElementById(tikiId)
@@ -91,9 +91,10 @@ const tikiAnonGoTo = (step) => {
       break
     }
     case 'terms': {
-      const terms = TikiSdk.UI.Screen.Terms.create(
+      const terms = await TikiSdk.UI.Screen.Terms.create(
         {
-          src: TikiSdk.config()._offers[0]._terms
+          src: TikiSdk.config()._offers[0]._terms.src,
+          isHtml: true
         },
         async () => {
           if (!Shopify.designMode){
@@ -139,9 +140,9 @@ const tikiSdkConfig = () => {
     .offer
     .description(TIKI_SETTINGS.UI.description)
     .reward(TIKI_SETTINGS.UI.offerImage)
-    .bullet({ text: TIKI_SETTINGS.UI.useCase1, isUsed: TIKI_SETTINGS.UI.isUsed1 })
-    .bullet({ text: TIKI_SETTINGS.UI.useCase2, isUsed: TIKI_SETTINGS.UI.isUsed2 })
-    .bullet({ text: TIKI_SETTINGS.UI.useCase3, isUsed: TIKI_SETTINGS.UI.isUsed3 })
+    .bullet(TIKI_SETTINGS.UI.bullet1)
+    .bullet(TIKI_SETTINGS.UI.bullet2)
+    .bullet(TIKI_SETTINGS.UI.bullet3)
     .terms(TIKI_SETTINGS.UI.terms)
     .tag(TikiSdk.Trail.Title.TitleTag.deviceId())
     .use({ usecases: [TikiSdk.Trail.License.LicenseUsecase.attribution()], destinations: ['*'] })
@@ -162,7 +163,7 @@ window.addEventListener('load', async (event) => {
         tikiAnon()
     }
   } else {
-    if (!Shopify.designMode || TIKI_SETTINGS.preview === 'true') {
+    if (!Shopify.designMode || TIKI_SETTINGS.UI.preview === 'true') {
       tikiSdkConfig().add()
       tikiAnon()
     }
@@ -181,18 +182,17 @@ const tikiHandleDecision = async (accepted) => {
         let license = await TikiSdk.Trail.License.create(
             title.id,
             accepted ? offer._uses : [],
-            offer._terms,
+            offer._terms.src,
             offer._description,
             offer._expiry
         )
-        const discountId = TIKI_SETTINGS.discount.reference
         const payable = await TikiSdk.Trail.Payable.create(
             license.id,
             TIKI_SETTINGS.discount.amount,
             TIKI_SETTINGS.discount.type,
             TIKI_SETTINGS.discount.description,
             TIKI_SETTINGS.discount.expiry,
-            discountId
+            TIKI_SETTINGS.discount.reference,
         )
         if(payable){
             tikiSaveCustomerDiscount(customerId, discountId)
