@@ -16,12 +16,9 @@ const TIKI_SETTINGS = {
         terms : "{{ block.settings.terms }}"
     },
     discount: {{ app.metafields.mytiki.discount }},
-    publishingId: {{ app.metafields.tiki_keys.tiki_public_key }}
+    publishingId: "{{ app.metafields.mytiki.public_key_id }}"
 }
 </script>
-{% # theme-check-disable AssetSizeJavaScript %}
-<script async src="https://unpkg.com/@mytiki/tiki-sdk-js@2.1.3/dist/index.js"></script>
-{% # theme-check-enable AssetSizeJavaScript %}
 <script async src="{{ 'tiki_shopify.js' | asset_url }}"></script>
 
 {% schema %}

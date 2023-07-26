@@ -149,7 +149,7 @@ const tikiSdkConfig = () => {
 }
 
 window.addEventListener('load', async (event) => {
-  debugger
+  await loadTikiSdk();
   const customerId = tikiGetCustomerId()
   if (customerId) {
     await tikiSdkConfig()
@@ -186,17 +186,7 @@ const tikiHandleDecision = async (accepted) => {
             offer._description,
             offer._expiry
         )
-        const payable = await TikiSdk.Trail.Payable.create(
-            license.id,
-            TIKI_SETTINGS.discount.amount,
-            TIKI_SETTINGS.discount.type,
-            TIKI_SETTINGS.discount.description,
-            TIKI_SETTINGS.discount.expiry,
-            TIKI_SETTINGS.discount.reference,
-        )
-        if(payable){
-            tikiSaveCustomerDiscount(customerId, discountId)
-        }
+        tikiSaveCustomerDiscount(customerId, TIKI_SETTINGS.discount.reference)
     }
 }
 
@@ -211,13 +201,22 @@ const tikiSaveCustomerDiscount = async (customerId, discountId) => {
     const xTikiAddress = TikiSdk.Trail.address()
     const utf8Encoder = new TextEncoder()
     const customerDiscountByteArray = utf8Encoder.encode(customerDiscountBody) 
-    const xTikiAddressSig = await TikiSdk.IDP.Key.sign(customerId, customerDiscountByteArray)
+    const xTikiAddressSigUint = await TikiSdk.IDP.Key.sign(customerId, customerDiscountByteArray)
+    const xTikiAddressSig = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.addEventListener("load", function () {
+        const dataUrl = reader.result
+        resolve(dataUrl)
+      }, false);
+      reader.readAsDataURL(new Blob([xTikiAddressSigUint.buffer]))
+    })
     const headers = {
         'Authorization': `Bearer ${authToken.accessToken}`, 
         'X-Tiki-Address ': xTikiAddress,
         'X-Tiki-Address-Signature': xTikiAddressSig
     }
-    fetch(`https://${Shopify.shop}/mytiki/api/latest/customer/discount`, {
+    debugger
+    fetch(`https://${Shopify.shop}/apps/tiki/customer/discount`, {
 		method: 'POST',
 		headers,
         body: customerDiscountBody
@@ -225,4 +224,25 @@ const tikiSaveCustomerDiscount = async (customerId, discountId) => {
 		.then(response => response.json())
 		.then(response => console.log(response))
 		.catch(err => console.error(err));
+}
+
+const loadTikiSdk = () => {
+  return new Promise((resolve, reject) => {
+    const script = window.document.createElement('script');
+    script.src = 'https://unpkg.com/@mytiki/tiki-sdk-js@2.1.3/dist/index.js';
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+
+    script.addEventListener('load', () => {
+      console.log(`TIKI SDK Loaded. Size: ${script.length}`)
+      resolve(script)
+    }, false);
+
+    script.addEventListener('error', (e) => {
+      console.log(`TIKI SDK not loaded. Error: ${e.message}`)
+      reject(e)
+    }, false);
+
+    window.document.body.appendChild(script);
+  })
 }
