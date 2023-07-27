@@ -188,14 +188,14 @@ const tikiHandleDecision = async (accepted) => {
         )
         const payable = await TikiSdk.Trail.Payable.create(
             license.id,
-            TIKI_SETTINGS.discount.amount,
+            TIKI_SETTINGS.discount.amount.toString(),
             TIKI_SETTINGS.discount.type,
             TIKI_SETTINGS.discount.description,
             TIKI_SETTINGS.discount.expiry,
             TIKI_SETTINGS.discount.reference,
         )
         if(payable){
-            tikiSaveCustomerDiscount(customerId, discountId)
+            tikiSaveCustomerDiscount(customerId, TIKI_SETTINGS.discount.reference)
         }
     }
 }
@@ -209,14 +209,22 @@ const tikiSaveCustomerDiscount = async (customerId, discountId) => {
     })
     const authToken = await TikiSdk.IDP.Auth.token()
     const xTikiAddress = TikiSdk.Trail.address()
-    const utf8Encoder = new TextEncoder()
-    const customerDiscountByteArray = utf8Encoder.encode(customerDiscountBody) 
-    const xTikiAddressSig = await TikiSdk.IDP.Key.sign(customerId, customerDiscountByteArray)
+    const customerDiscountByteArray = new TextEncoder('utf8').encode(customerDiscountBody) 
+    const xTikiAddressSigUint = await TikiSdk.IDP.Key.sign(customerId, customerDiscountByteArray)
+    const xTikiAddressSig = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.addEventListener("load", function () {
+          const dataUrl = reader.result
+          resolve(dataUrl)
+        }, false);
+        reader.readAsDataURL(new Blob([xTikiAddressSigUint.buffer]))
+      })
     const headers = {
         'Authorization': `Bearer ${authToken.accessToken}`, 
-        'X-Tiki-Address ': xTikiAddress,
+        'X-Tiki-Address': xTikiAddress,
         'X-Tiki-Address-Signature': xTikiAddressSig
     }
+    debugger
     fetch(`https://${Shopify.shop}/mytiki/api/latest/customer/discount`, {
 		method: 'POST',
 		headers,
