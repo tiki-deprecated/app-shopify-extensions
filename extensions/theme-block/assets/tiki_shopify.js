@@ -3,7 +3,7 @@
 const tikiId = 'tiki-offer'
 const tikiOverlayId = 'tiki-offer-overlay'
 
-const tikiCreateTitle = async (offer) => {
+const tikiGetOrCreateTitle = async (offer) => {
     let title = await TikiSdk.Trail.Title.getByPtr(offer._ptr)
     if (!title) {
         title = await TikiSdk.Trail.Title.create(
@@ -15,44 +15,15 @@ const tikiCreateTitle = async (offer) => {
     return title
 }
 
-const tikiGetCustomerId = () => {
-  try {
-    const curr = window.ShopifyAnalytics.meta.page.customerId
-    if (curr !== undefined && curr !== null && curr !== '') {
-      return curr
-    }
-  } catch (e) { }
-  try {
-    const curr = window.meta.page.customerId
-    if (curr !== undefined && curr !== null && curr !== '') {
-      return curr
-    }
-  } catch (e) { }
-  try {
-    const curr = _st.cid
-    if (curr !== undefined && curr !== null && curr !== '') {
-      return curr
-    }
-  } catch (e) { }
-  try {
-    const curr = ShopifyAnalytics.lib.user().traits().uniqToken
-    if (curr !== undefined && curr !== null && curr !== '') {
-      return curr
-    }
-  } catch (e) { }
-  return null
-}
-
 const tikiAnon = () => {
-  if (document.getElementById(tikiId) == null) {
-    const div = document.createElement('div')
-    div.id = tikiId
-    div.appendChild(tikiAnonCreateOverlay())
-    document.body.appendChild(div)
-    tikiAnonGoTo('prompt')
-  }
+    if(TIKI_SETTINGS.discount &&  document.getElementById(tikiId) == null) {
+        const div = document.createElement('div')
+        div.id = tikiId
+        div.appendChild(tikiAnonCreateOverlay())
+        document.body.appendChild(div)
+        tikiAnonGoTo('prompt')
+    }
 }
-
 const tikiAnonGoTo = async (step) => {
   switch (step) {
     case 'none': {
@@ -149,8 +120,11 @@ const tikiSdkConfig = () => {
 }
 
 window.addEventListener('load', async (event) => {
-  await loadTikiSdk();
-  const customerId = tikiGetCustomerId()
+  if(!TIKI_SETTINGS.discount){
+    console.log("TIKI is active, but no discount is configured. Hiding banner.")
+    return
+  }
+  const customerId = __st.id
   if (customerId) {
     await tikiSdkConfig()
       .ptr(customerId)
@@ -160,25 +134,36 @@ window.addEventListener('load', async (event) => {
     if (tikiDecisionCookie) {
         tikiHandleDecision()
     } else {
+        const title = await TikiSdk.Trail.Title.getByPtr(offer._ptr)
+        if (title) {
+            const license = await TikiSdk.Trail.License.getLatest(title.id)
+             if(license){
+                console.log("The user has a valid License. Banner will not be shown.")
+                return
+             }
+        }
         tikiAnon()
     }
   } else {
     if (!Shopify.designMode || TIKI_SETTINGS.UI.preview === 'true') {
-      tikiSdkConfig().add()
-      tikiAnon()
+        const tikiDecisionCookie = document.cookie.match(/(?:^|;\s*)tiki_decision=([^;]*)/)
+        if (!tikiDecisionCookie) {
+            tikiSdkConfig().add()
+            tikiAnon()
+        }
     }
   }
 })
 
 const tikiHandleDecision = async (accepted) => {
-    const customerId = tikiGetCustomerId()
+    const customerId = __st.id
     if(!customerId){
         const expiry = new Date();
         expiry.setFullYear(expiry.getFullYear() + 1);
         document.cookie = `tiki_decision=true; expires=${expiry.toUTCString()}; path=/`;
     }else{
         const offer = TikiSdk.config()._offers[0]
-        let title = await tikiCreateTitle(offer)
+        let title = await tikiGetOrCreateTitle(offer)
         let license = await TikiSdk.Trail.License.create(
             title.id,
             accepted ? offer._uses : [],
@@ -186,7 +171,17 @@ const tikiHandleDecision = async (accepted) => {
             offer._description,
             offer._expiry
         )
-        tikiSaveCustomerDiscount(customerId, TIKI_SETTINGS.discount.reference)
+        const payable = await TikiSdk.Trail.Payable.create(
+            license.id,
+            TIKI_SETTINGS.discount.amount.toString(),
+            TIKI_SETTINGS.discount.type,
+            TIKI_SETTINGS.discount.description,
+            TIKI_SETTINGS.discount.expiry,
+            TIKI_SETTINGS.discount.reference,
+        )
+        if(payable){
+            tikiSaveCustomerDiscount(customerId, TIKI_SETTINGS.discount.reference)
+        }
     }
 }
 
@@ -199,24 +194,23 @@ const tikiSaveCustomerDiscount = async (customerId, discountId) => {
     })
     const authToken = await TikiSdk.IDP.Auth.token()
     const xTikiAddress = TikiSdk.Trail.address()
-    const utf8Encoder = new TextEncoder()
-    const customerDiscountByteArray = utf8Encoder.encode(customerDiscountBody) 
+    const customerDiscountByteArray = new TextEncoder('utf8').encode(customerDiscountBody) 
     const xTikiAddressSigUint = await TikiSdk.IDP.Key.sign(customerId, customerDiscountByteArray)
     const xTikiAddressSig = await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.addEventListener("load", function () {
-        const dataUrl = reader.result
-        resolve(dataUrl)
-      }, false);
-      reader.readAsDataURL(new Blob([xTikiAddressSigUint.buffer]))
-    })
+        const reader = new FileReader();
+        reader.addEventListener("load", function () {
+          const dataUrl = reader.result
+          resolve(dataUrl)
+        }, false);
+        reader.readAsDataURL(new Blob([xTikiAddressSigUint.buffer]))
+      })
     const headers = {
         'Authorization': `Bearer ${authToken.accessToken}`, 
-        'X-Tiki-Address ': xTikiAddress,
-        'X-Tiki-Address-Signature': xTikiAddressSig
+        'X-Tiki-Address': xTikiAddress,
+        'X-Tiki-Signature': xTikiAddressSig
     }
     debugger
-    fetch(`https://${Shopify.shop}/apps/tiki/customer/discount`, {
+    fetch(`https://tiki.shopify.brgweb.com.br/api/latest/customer/discount`, {
 		method: 'POST',
 		headers,
         body: customerDiscountBody
@@ -229,7 +223,7 @@ const tikiSaveCustomerDiscount = async (customerId, discountId) => {
 const loadTikiSdk = () => {
   return new Promise((resolve, reject) => {
     const script = window.document.createElement('script');
-    script.src = 'https://unpkg.com/@mytiki/tiki-sdk-js@2.1.3/dist/index.js';
+    script.src = 'https://unpkg.com/@mytiki/tiki-sdk-js@2.1.4/dist/index.js';
     script.async = true;
     script.crossOrigin = 'anonymous';
 

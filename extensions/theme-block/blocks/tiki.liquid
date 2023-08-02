@@ -15,7 +15,7 @@ const TIKI_SETTINGS = {
         bullet3: {{ block.settings.bullet3 }},
         terms : "{{ block.settings.terms }}"
     },
-    discount: {{ app.metafields.mytiki.discount }},
+    discount: {{ app.metafields.mytiki.discount | default: undefined }},
     publishingId: "{{ app.metafields.mytiki.public_key_id }}"
 }
 </script>
