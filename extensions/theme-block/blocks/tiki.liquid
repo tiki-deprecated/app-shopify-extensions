@@ -7,13 +7,12 @@ const TIKI_SETTINGS = {
         primaryBackgroundColor : "{{ block.settings.primaryBackgroundColor }}",
         secondaryBackgroundColor : "{{ block.settings.secondaryBackgroundColor }}",
         accentColor : "{{ block.settings.accentColor }}",
-        fontFamily : "{{ block.settings.fontFamily }}",
         description : "{{ block.settings.description }}",
         offerImage : "{{ block.settings.offerImage | image_url }}",
-        bullet1: {{ block.settings.bullet1 }},
-        bullet2: {{ block.settings.bullet2 }},
-        bullet3: {{ block.settings.bullet3 }},
-        terms : "{{ block.settings.terms }}"
+        bullet1: { text: "bullet 1", isUsed: true },
+        bullet2: { text: "bullet 2", isUsed: true },
+        bullet3: { text: "bullet 3", isUsed: true },
+        terms : "updated terms not working"
     },
     discount: {{ app.metafields.mytiki.discount | default: undefined }},
     publishingId: "{{ app.metafields.mytiki.public_key_id }}"

@@ -125,6 +125,7 @@ window.addEventListener('load', async (event) => {
     return
   }
   const customerId = __st.id
+  await loadTikiSdk();
   if (customerId) {
     await tikiSdkConfig()
       .ptr(customerId)
@@ -156,7 +157,7 @@ window.addEventListener('load', async (event) => {
 })
 
 const tikiHandleDecision = async (accepted) => {
-    const customerId = __st.id
+    const customerId = __st.cid
     if(!customerId){
         const expiry = new Date();
         expiry.setFullYear(expiry.getFullYear() + 1);
