@@ -3,7 +3,39 @@
 const tikiId = 'tiki-offer'
 const tikiOverlayId = 'tiki-offer-overlay'
 
-const tikiCreateTitle = async (offer) => {
+window.addEventListener('load', async (event) => {
+  const customerId = __st.cid
+  if (customerId) {
+    await tikiSdkConfig()
+      .ptr(customerId.toString())
+      .add()
+      .initialize(TIKI_SETTINGS.publishingId, customerId)
+    const tikiDecisionCookie = document.cookie.match(/(?:^|;\s*)tiki_decision=([^;]*)/)
+    if (tikiDecisionCookie) {
+        tikiHandleDecision()
+    } else {
+        const title = await TikiSdk.Trail.Title.getByPtr(customerId.toString())
+        if (title) {
+            const license = await TikiSdk.Trail.License.getLatest(title.id)
+             if(license){
+                console.log("The user has a valid License. Banner will not be shown.")
+                return
+             }
+        }
+        tikiAnon()
+    }
+  } else {
+    if (!Shopify.designMode || TIKI_SETTINGS.UI.preview === 'true') {
+        const tikiDecisionCookie = document.cookie.match(/(?:^|;\s*)tiki_decision=([^;]*)/)
+        if (!tikiDecisionCookie) {
+            tikiSdkConfig().add()
+            tikiAnon()
+        }
+    }
+  }
+})
+
+const tikiGetOrCreateTitle = async (offer) => {
     let title = await TikiSdk.Trail.Title.getByPtr(offer._ptr)
     if (!title) {
         title = await TikiSdk.Trail.Title.create(
@@ -15,42 +47,14 @@ const tikiCreateTitle = async (offer) => {
     return title
 }
 
-const tikiGetCustomerId = () => {
-  try {
-    const curr = window.ShopifyAnalytics.meta.page.customerId
-    if (curr !== undefined && curr !== null && curr !== '') {
-      return curr
-    }
-  } catch (e) { }
-  try {
-    const curr = window.meta.page.customerId
-    if (curr !== undefined && curr !== null && curr !== '') {
-      return curr
-    }
-  } catch (e) { }
-  try {
-    const curr = _st.cid
-    if (curr !== undefined && curr !== null && curr !== '') {
-      return curr
-    }
-  } catch (e) { }
-  try {
-    const curr = ShopifyAnalytics.lib.user().traits().uniqToken
-    if (curr !== undefined && curr !== null && curr !== '') {
-      return curr
-    }
-  } catch (e) { }
-  return null
-}
-
 const tikiAnon = () => {
-  if (document.getElementById(tikiId) == null) {
-    const div = document.createElement('div')
-    div.id = tikiId
-    div.appendChild(tikiAnonCreateOverlay())
-    document.body.appendChild(div)
-    tikiAnonGoTo('prompt')
-  }
+    if(TIKI_SETTINGS.discount &&  document.getElementById(tikiId) == null) {
+        const div = document.createElement('div')
+        div.id = tikiId
+        div.appendChild(tikiAnonCreateOverlay())
+        document.body.appendChild(div)
+        tikiAnonGoTo('prompt')
+    }
 }
 
 const tikiAnonGoTo = async (step) => {
@@ -148,37 +152,15 @@ const tikiSdkConfig = () => {
     .use({ usecases: [TikiSdk.Trail.License.LicenseUsecase.attribution()], destinations: ['*'] })
 }
 
-window.addEventListener('load', async (event) => {
-  debugger
-  const customerId = tikiGetCustomerId()
-  if (customerId) {
-    await tikiSdkConfig()
-      .ptr(customerId)
-      .add()
-      .initialize(TIKI_SETTINGS.publishingId, customerId)
-    const tikiDecisionCookie = document.cookie.match(/(?:^|;\s*)tiki_decision=([^;]*)/)
-    if (tikiDecisionCookie) {
-        tikiHandleDecision()
-    } else {
-        tikiAnon()
-    }
-  } else {
-    if (!Shopify.designMode || TIKI_SETTINGS.UI.preview === 'true') {
-      tikiSdkConfig().add()
-      tikiAnon()
-    }
-  }
-})
-
 const tikiHandleDecision = async (accepted) => {
-    const customerId = tikiGetCustomerId()
+    const customerId = __st.cid
     if(!customerId){
         const expiry = new Date();
         expiry.setFullYear(expiry.getFullYear() + 1);
         document.cookie = `tiki_decision=true; expires=${expiry.toUTCString()}; path=/`;
     }else{
         const offer = TikiSdk.config()._offers[0]
-        let title = await tikiCreateTitle(offer)
+        let title = await tikiGetOrCreateTitle(offer)
         let license = await TikiSdk.Trail.License.create(
             title.id,
             accepted ? offer._uses : [],
@@ -188,14 +170,14 @@ const tikiHandleDecision = async (accepted) => {
         )
         const payable = await TikiSdk.Trail.Payable.create(
             license.id,
-            TIKI_SETTINGS.discount.amount,
+            TIKI_SETTINGS.discount.amount.toString(),
             TIKI_SETTINGS.discount.type,
             TIKI_SETTINGS.discount.description,
             TIKI_SETTINGS.discount.expiry,
             TIKI_SETTINGS.discount.reference,
         )
         if(payable){
-            tikiSaveCustomerDiscount(customerId, discountId)
+            tikiSaveCustomerDiscount(customerId, TIKI_SETTINGS.discount.reference)
         }
     }
 }
@@ -209,15 +191,15 @@ const tikiSaveCustomerDiscount = async (customerId, discountId) => {
     })
     const authToken = await TikiSdk.IDP.Auth.token()
     const xTikiAddress = TikiSdk.Trail.address()
-    const utf8Encoder = new TextEncoder()
-    const customerDiscountByteArray = utf8Encoder.encode(customerDiscountBody) 
-    const xTikiAddressSig = await TikiSdk.IDP.Key.sign(customerId, customerDiscountByteArray)
+    const customerDiscountByteArray = new TextEncoder('utf8').encode(customerDiscountBody) 
+    const xTikiAddressSigUint = await TikiSdk.IDP.Key.sign(customerId, customerDiscountByteArray)
+    const xTikiAddressSig = b64Encode(xTikiAddressSigUint)
     const headers = {
         'Authorization': `Bearer ${authToken.accessToken}`, 
-        'X-Tiki-Address ': xTikiAddress,
-        'X-Tiki-Address-Signature': xTikiAddressSig
+        'X-Tiki-Address': xTikiAddress,
+        'X-Tiki-Signature': xTikiAddressSig
     }
-    fetch(`https://${Shopify.shop}/mytiki/api/latest/customer/discount`, {
+    fetch(`https://tiki.shopify.brgweb.com.br/api/latest/customer/discount`, {
 		method: 'POST',
 		headers,
         body: customerDiscountBody
@@ -226,3 +208,7 @@ const tikiSaveCustomerDiscount = async (customerId, discountId) => {
 		.then(response => console.log(response))
 		.catch(err => console.error(err));
 }
+
+const b64Encode = (bytes) => btoa(bytes.reduce((acc, current) => acc + String.fromCharCode(current), ""));
+
+const b64Decode = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
