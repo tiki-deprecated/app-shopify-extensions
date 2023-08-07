@@ -18,7 +18,11 @@ const TIKI_SETTINGS = {
     publishingId: "{{ app.metafields.mytiki.public_key_id }}"
 }
 </script>
+{% # theme-check-disable AssetSizeJavaScript %}
+<script async src="https://unpkg.com/@mytiki/tiki-sdk-js@2.1.4/dist/index.js"></script>
+{% # theme-check-enable AssetSizeJavaScript %}
 <script async src="{{ 'tiki_shopify.js' | asset_url }}"></script>
+
 
 {% schema %}
 {

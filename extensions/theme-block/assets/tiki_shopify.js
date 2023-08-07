@@ -14,14 +14,14 @@ window.addEventListener('load', async (event) => {
     if (tikiDecisionCookie) {
         tikiHandleDecision()
     } else {
-        const title = await TikiSdk.Trail.Title.getByPtr(customerId.toString())
-        if (title) {
-            const license = await TikiSdk.Trail.License.getLatest(title.id)
-             if(license){
-                console.log("The user has a valid License. Banner will not be shown.")
-                return
-             }
-        }
+        // const title = await TikiSdk.Trail.Title.getByPtr(customerId.toString())
+        // if (title) {
+        //     const license = await TikiSdk.Trail.License.getLatest(title.id)
+        //      if(license){
+        //         console.log("The user has a valid License. Banner will not be shown.")
+        //         return
+        //      }
+        // }
         tikiAnon()
     }
   } else {
@@ -204,8 +204,8 @@ const tikiSaveCustomerDiscount = async (customerId, discountId) => {
 		headers,
         body: customerDiscountBody
 	})
-		.then(response => response.json())
-		.then(response => console.log(response))
+		.then(response => response.text())
+		.then(response => console.log(`Discount saved! ${response}`))
 		.catch(err => console.error(err));
 }
 
