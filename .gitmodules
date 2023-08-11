@@ -1,6 +1,0 @@
-[submodule "web/frontend"]
-	path = web/frontend
-	url = https://github.com/tiki/tiki-shopify-frontend
-[submodule "web/backend"]
-	path = web/backend
-	url = https://github.com/tiki/tiki-shopify-backend
