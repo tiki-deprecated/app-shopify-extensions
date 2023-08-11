@@ -16,15 +16,22 @@ const EMPTY_DISCOUNT: FunctionResult = {
 
 const isDiscountAllowed = (input: InputQuery) => {
     const discountAllowed: string | undefined = input.cart.buyerIdentity?.customer?.discountAllowed?.value
+    if(discountAllowed === undefined){
+        return false;
+    }
+    const discountAllowedList: Array<string> = JSON.parse(discountAllowed)
+    if( discountAllowedList.length === 0 ){
+        return false;
+    }
     const tid: string = input.discountNode.tid!.value
-    return !discountAllowed || JSON.parse(discountAllowed).indexOf(tid) === -1
+    return JSON.parse(discountAllowed).indexOf(tid) !== -1
 }
 
 const isAlreadyUsed = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
     const tid: string = input.discountNode.tid!.value
-    if( discountMeta.onePerUser ){
+    if(  discountMeta.onePerUser ){
         const discounUsed = input.cart.buyerIdentity?.customer?.discountUsed?.value ?? '[]'
-        return JSON.parse(discounUsed).indexOf(tid) === -1
+        return JSON.parse(discounUsed).indexOf(tid) !== -1
     }
     return false
 }

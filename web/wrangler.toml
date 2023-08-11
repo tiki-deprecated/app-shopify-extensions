@@ -1,0 +1,29 @@
+name = "intg-shopify-backend"
+main = "dist/worker.js"
+compatibility_date = "2023-06-05"
+
+kv_namespaces = [
+    { binding = "KV_STORE", id = "3bd0c27a6cf04d4382922b5493bbfe86" }
+]
+
+[vars]
+KEY_ID = "33d82ccecd1a316a4cbdb7d090735fa8"
+FUNCTION_ID_ORDER_DISCOUNT = "01H3DFRZZ4FSGBH438FGSPJZPZ"
+FUNCTION_ID_PRODUCT_DISCOUNT = "01H3DFS2EPHWX7KTZR8HZADW6T"
+JWK = "{\"kty\": \"EC\",\"use\": \"sig\",\"crv\": \"P-256\",\"kid\": \"0d2dbad0-81f5-4625-94a8-91e839581ac8\",\"x\": \"F4hIC9DufzIBAolcQsfOpsBEQd6Vgw5T2eci0GzuQM0\",\"y\": \"nkGBEGRI-QZ8AVztb20W2pzulUx_-jWbxiP1cgc89PY\",\"alg\": \"ES256\"}"
+
+# The necessary secrets are:
+# - KEY_SECRET
+# - ADMIN_ID
+# - ADMIN_SECRET
+
+[env.production]
+account_id = "5c5263e05bb1e54242b1afb12a5c9259"
+
+routes = [
+    { pattern = "shopify.intg.mytiki.com/api/latest/*", zone_id = "7be31970110fa56b1f8e1fe915a8b938" }
+]
+
+kv_namespaces = [
+    { binding = "KV_STORE", id = "6f3ba354a5e444f1b21e0093c80f6e85", preview_id = "ff086acf88b0483ca83a6bde7fe74600" }
+]
