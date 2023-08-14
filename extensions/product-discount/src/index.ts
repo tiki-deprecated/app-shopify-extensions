@@ -36,7 +36,8 @@ const isAlreadyUsed = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => 
     return false
 }
 
-const setDiscountValue = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
+const 
+setDiscountValue = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
     const discountType = discountMeta.discountType
     const discountValue: number = Number(discountMeta.discountValue)
     switch(discountType) {
@@ -59,14 +60,21 @@ const setTargets = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
     const products: string[] = JSON.parse(input.discountNode.products?.value ?? '[]')
     const minQty: number = Number(discountMeta.minQty)
     const minValue: number = Number(discountMeta.minValue)
+    console.log(input.cart.lines)
     for(let line of input.cart.lines){
+        console.log(products.indexOf(line.id) > -1)
+        console.log(line.quantity > minQty )
+        console.log(line.cost.subtotalAmount.amount > minValue)
        if(
-        products.indexOf(line.id) > -1 &&
+        (products.length == 0 || products.indexOf(line.id) > -1) &&
         line.quantity > minQty &&
         line.cost.subtotalAmount.amount > minValue
         ){
+        let productVariantTgt = {
+            id: (line.merchandise as ProductVariant).id,
+        }
         targets.push(
-            {productVariant: line.merchandise as ProductVariant}
+            {productVariant: productVariantTgt}
         )
        }
 
@@ -77,9 +85,9 @@ const setTargets = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
 export default (input: InputQuery): FunctionResult => {
     try{
         const discountMeta: ShopifyDiscountMeta = JSON.parse(input.discountNode.discount_meta!.value)
-        if(!isDiscountAllowed(input) || isAlreadyUsed(input,discountMeta)){
-            return EMPTY_DISCOUNT
-        }
+        // if(!isDiscountAllowed(input) || isAlreadyUsed(input,discountMeta)){
+        //     return EMPTY_DISCOUNT
+        // }
         const targets: Array<Target> = setTargets(input, discountMeta)
         const value: Value = setDiscountValue(input, discountMeta)
         const discount: Discount = {
