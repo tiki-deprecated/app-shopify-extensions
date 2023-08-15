@@ -19,7 +19,9 @@ const TIKI_SETTINGS = {
 }
 </script>
 <script async src="{{ 'tiki_shopify.js' | asset_url }}"></script>
-
+{% # theme-check-disable AssetSizeJavaScript %}
+<script async src="https://unpkg.com/@mytiki/tiki-sdk-js@2.1.4/dist/index.js"></script>
+{% # theme-check-enable AssetSizeJavaScript %}
 
 {% schema %}
 {
