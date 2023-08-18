@@ -42,7 +42,7 @@ const setDiscountValue = (input: InputQuery, discountMeta: ShopifyDiscountMeta) 
     const discountType = discountMeta.discountType
     const discountValue: number = discountMeta.discountValue
     switch(discountType) {
-        case 'percentage':
+        case 'percent':
             return {
                percentage: {
                 value: discountValue
