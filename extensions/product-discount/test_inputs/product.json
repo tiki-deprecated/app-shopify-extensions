@@ -1,0 +1,38 @@
+{
+    "cart": {
+      "buyerIdentity": {
+        "customer": {
+          "discountAllowed": {
+            "value": "[\"TestDiscount\",\"TID\"]"
+          },
+          "discountUsed": {
+            "value": "[\"TID\"]"
+          }
+        }
+      },     
+      "lines": [
+        {
+          "quantity": 1,
+          "cost": {
+            "subtotalAmount": {
+              "amount": "800.95"
+            }
+          }
+        }
+      ]
+    },
+    "discountNode": {
+      "tid": {
+        "value": "TID"
+      },
+      "discount_meta": {
+        "value": "{\"type\":\"product\",\"description\":\"$10 off any product:)\",\"discountType\":\"amount\",\"discountValue\":10,\"minValue\":\"750.00\",\"minQty\":0,\"onePerUser\":false,\"products\":[],\"collections\":[]}"
+      }
+    },
+    "products":{
+        "value":{}
+    },
+    "collection": {
+        "value":{}
+    }
+  }
