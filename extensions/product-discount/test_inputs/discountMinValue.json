@@ -1,0 +1,44 @@
+{
+    "cart": {
+      "lines": [
+        {
+          "id": "gid://shopify/CartLine/0",
+          "quantity": 1,
+          "merchandise": {
+            "id": "gid://shopify/ProductVariant/45201700782397",
+            "product": {
+              "inAnyCollection": false
+            }
+          },
+          "cost": {
+            "subtotalAmount": {
+              "amount": "20.95"
+            }
+          }
+        }
+      ],
+      "buyerIdentity": {
+        "customer": {
+            "discountAllowed": {
+              "value": "[\"TestDiscount\",\"TID\"]"
+            },
+            "discountUsed": {
+              "value": "[\"TID\"]"
+            }
+          }
+      }
+    },
+    "discountNode": {
+      "tid": {
+        "value": "TID"
+      },
+      "discount_meta": {
+        "value": "{\"description\":\"20off\",\"type\":\"product\",\"discountType\":\"amount\",\"discountValue\":20,\"minValue\":10.00,\"minQty\":0,\"onePerUser\":false,\"products\":[\"gid://shopify/ProductVariant/45201700782397\"],\"collections\":[]}"
+      },
+      "products": {
+        "value": "[\"gid://shopify/ProductVariant/45201700782397\"]"
+      },
+      "collections": {
+        "value": "[]"
+      }
+    }}

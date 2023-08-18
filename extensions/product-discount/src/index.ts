@@ -30,8 +30,8 @@ const isDiscountAllowed = (input: InputQuery) => {
 const isAlreadyUsed = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
     const tid: string = input.discountNode.tid!.value
     if(  discountMeta.onePerUser ){
-        const discounUsed = input.cart.buyerIdentity?.customer?.discountUsed?.value ?? '[]'
-        return JSON.parse(discounUsed).indexOf(tid) !== -1
+        const discountUsed = input.cart.buyerIdentity?.customer?.discountUsed?.value ?? '[]'
+        return JSON.parse(discountUsed).indexOf(tid) !== -1
     }
     return false
 }
@@ -72,6 +72,10 @@ const setTargets = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
             {productVariant: productVariantTgt}
         )
        }
+       if( line.quantity! < minQty ||
+            line?.cost.subtotalAmount?.amount < minValue){
+            throw Error ('Error in Min Value/Min Discount') 
+        }
 
     }
     return targets
