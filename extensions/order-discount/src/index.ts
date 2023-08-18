@@ -31,9 +31,9 @@ const isDiscountAllowed = (input: InputQuery) => {
 
 const isAlreadyUsed = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
     const tid: string = input.discountNode.tid!.value
-    if(  discountMeta.onePerUser ){
-        const discounUsed = input.cart.buyerIdentity?.customer?.discountUsed?.value ?? '[]'
-        return JSON.parse(discounUsed).indexOf(tid) !== -1
+    if ( discountMeta.onePerUser ){
+        const discountUsed = input.cart.buyerIdentity?.customer?.discountUsed?.value ?? '[]'
+        return JSON.parse(discountUsed).indexOf(tid) !== -1
     }
     return false
 }
@@ -57,11 +57,30 @@ const setDiscountValue = (input: InputQuery, discountMeta: ShopifyDiscountMeta) 
 }
 
 const setConditions = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
-    let minValue = 0.01;
-    if(discountMeta.minValue > 0){
-        minValue = discountMeta.minValue;
+    // let minValue = 0.01;
+    // if(discountMeta.minValue > 0){
+    //     minValue = discountMeta.minValue;
+    // }
+    // return [{ 
+    //     orderMinimumSubtotal: {
+    //         minimumAmount: minValue,
+    //         targetType: TargetType.OrderSubtotal,
+    //         excludedVariantIds: []
+    //     },
+    //     productMinimumQuantity: undefined,
+    //     productMinimumSubtotal: undefined,
+    // } as Condition]
+    const minQty: number = Number(discountMeta.minQty)
+    const minValue: number = Number(discountMeta.minValue)
+    for(let line of input.cart.lines){
+       if(
+        line.quantity! < minQty ||
+        input.cart?.cost?.subtotalAmount?.amount < minValue
+        ){
+            throw Error ('Error in Min Value/Min Discount')
+        }
     }
-    return [{ 
+     return [{ 
         orderMinimumSubtotal: {
             minimumAmount: minValue,
             targetType: TargetType.OrderSubtotal,
