@@ -168,16 +168,18 @@ const tikiHandleDecision = async (accepted) => {
             offer._description,
             offer._expiry
         )
-        const payable = await TikiSdk.Trail.Payable.create(
-            license.id,
-            TIKI_SETTINGS.discount.amount.toString(),
-            TIKI_SETTINGS.discount.type,
-            TIKI_SETTINGS.discount.description,
-            TIKI_SETTINGS.discount.expiry,
-            TIKI_SETTINGS.discount.reference,
-        )
-        if(payable){
-            tikiSaveCustomerDiscount(customerId, TIKI_SETTINGS.discount.reference)
+        if(accepted){
+            const payable = await TikiSdk.Trail.Payable.create(
+                license.id,
+                TIKI_SETTINGS.discount.amount.toString(),
+                TIKI_SETTINGS.discount.type,
+                TIKI_SETTINGS.discount.description,
+                TIKI_SETTINGS.discount.expiry,
+                TIKI_SETTINGS.discount.reference,
+            )
+            if(payable){
+                tikiSaveCustomerDiscount(customerId, TIKI_SETTINGS.discount.reference)
+            }
         }
     }
 }

@@ -30,18 +30,17 @@ const isDiscountAllowed = (input: InputQuery) => {
 const isAlreadyUsed = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
     const tid: string = input.discountNode.tid!.value
     if(  discountMeta.onePerUser ){
-        const discounUsed = input.cart.buyerIdentity?.customer?.discountUsed?.value ?? '[]'
-        return JSON.parse(discounUsed).indexOf(tid) !== -1
+        const discountUsed = input.cart.buyerIdentity?.customer?.discountUsed?.value ?? '[]'
+        return JSON.parse(discountUsed).indexOf(tid) !== -1
     }
     return false
 }
 
-const 
-setDiscountValue = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
+const setDiscountValue = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
     const discountType = discountMeta.discountType
     const discountValue: number = Number(discountMeta.discountValue)
     switch(discountType) {
-        case 'percentage':
+        case 'percent':
             return {
                percentage: {
                 value: discountValue
@@ -60,11 +59,7 @@ const setTargets = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
     const products: string[] = JSON.parse(input.discountNode.products?.value ?? '[]')
     const minQty: number = Number(discountMeta.minQty)
     const minValue: number = Number(discountMeta.minValue)
-    console.log(input.cart.lines)
     for(let line of input.cart.lines){
-        console.log(products.indexOf(line.id) > -1)
-        console.log(line.quantity > minQty )
-        console.log(line.cost.subtotalAmount.amount > minValue)
        if(
         (products.length == 0 || products.indexOf(line.id) > -1) &&
         line.quantity > minQty &&
@@ -77,6 +72,10 @@ const setTargets = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
             {productVariant: productVariantTgt}
         )
        }
+       if( line.quantity! < minQty ||
+            line?.cost.subtotalAmount?.amount < minValue){
+            throw Error ('Error in Min Value/Min Discount') 
+        }
 
     }
     return targets
@@ -85,9 +84,9 @@ const setTargets = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
 export default (input: InputQuery): FunctionResult => {
     try{
         const discountMeta: ShopifyDiscountMeta = JSON.parse(input.discountNode.discount_meta!.value)
-        // if(!isDiscountAllowed(input) || isAlreadyUsed(input,discountMeta)){
-        //     return EMPTY_DISCOUNT
-        // }
+        if(!isDiscountAllowed(input) || isAlreadyUsed(input,discountMeta)){
+            return EMPTY_DISCOUNT
+        }
         const targets: Array<Target> = setTargets(input, discountMeta)
         const value: Value = setDiscountValue(input, discountMeta)
         const discount: Discount = {
@@ -99,7 +98,6 @@ export default (input: InputQuery): FunctionResult => {
             "discounts": [discount]
         }
     }catch(e){
-        console.log(e)
         return EMPTY_DISCOUNT
     }
 };
