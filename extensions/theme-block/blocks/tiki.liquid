@@ -1,3 +1,9 @@
+<style>
+.tiki-terms-legal-md {
+    text-align: justify;
+    font-size: 0.75em;
+}
+</style>
 <script>
 const TIKI_SETTINGS = {
     UI : {
@@ -12,7 +18,7 @@ const TIKI_SETTINGS = {
         bullet1: {{ block.settings.bullet1 }},
         bullet2: {{ block.settings.bullet2 }},
         bullet3: {{ block.settings.bullet3 }},
-        terms : "{{ block.settings.terms }}"
+        terms : "{{ block.settings.terms | replace: '"', '\"' }}"
     },
     discount: {{ app.metafields.mytiki.discount | default: undefined }},
     publishingId: "{{ app.metafields.mytiki.public_key_id }}"
@@ -98,7 +104,7 @@ const TIKI_SETTINGS = {
         ],
         "default": "{ text: \"bullet 3\", isUsed: true }"
     },
-    { "type": "richtext", "id": "terms", "label": "Terms", "default": "<p>terms</p>", "info":"The terms and conditions URL for this offer agreement. It should be a URL to a plain text file containing the legal conditions. This file can include simple markdown format." }
+    { "type": "richtext", "id": "terms", "label": "Terms", "default": "", "info":"The terms and conditions URL for this offer agreement. It should be a URL to a plain text file containing the legal conditions. This file can include simple markdown format." }
   ]
 }
 {% endschema %}
