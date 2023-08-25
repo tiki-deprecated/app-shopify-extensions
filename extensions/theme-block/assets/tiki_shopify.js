@@ -4,7 +4,7 @@ const tikiId = 'tiki-offer'
 const tikiOverlayId = 'tiki-offer-overlay'
 
 window.addEventListener('load', async (event) => {
-  const customerId = __st.cid
+  const customerId = __st.a
   if (customerId) {
     await tikiSdkConfig()
       .ptr(customerId.toString())
@@ -153,7 +153,7 @@ const tikiSdkConfig = () => {
 }
 
 const tikiHandleDecision = async (accepted) => {
-    const customerId = __st.cid
+    const customerId = __st.a
     if(!customerId){
         const expiry = new Date();
         expiry.setFullYear(expiry.getFullYear() + 1);

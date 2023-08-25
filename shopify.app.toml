@@ -3,4 +3,3 @@
 name = "TIKI App"
 scopes = "read_orders,write_discounts"
 extension_directories = ["extensions/*"]
-web_directories = ["web"]
