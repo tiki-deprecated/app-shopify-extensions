@@ -3,6 +3,10 @@
     text-align: justify;
     font-size: 0.75em;
 }
+.tiki-offer-card-img{
+    width: 320px;
+    height: 96px;
+}
 </style>
 <script>
 const TIKI_SETTINGS = {
@@ -15,9 +19,9 @@ const TIKI_SETTINGS = {
         accentColor : "{{ block.settings.accentColor }}",
         description : "{{ block.settings.description }}",
         offerImage : "{{ block.settings.offerImage | image_url }}",
-        bullet1: {{ block.settings.bullet1 }},
-        bullet2: {{ block.settings.bullet2 }},
-        bullet3: {{ block.settings.bullet3 }},
+        bullet1: { text: "discover online shopping trends", isUsed: true },
+        bullet2: { text: "improve personalized advertising", isUsed: true },
+        bullet3: { text: "contact you directly", isUsed: false },
         terms : "{{ block.settings.terms | replace: '"', '\"' }}"
     },
     discount: {{ app.metafields.mytiki.discount | default: undefined }},
@@ -44,67 +48,7 @@ const TIKI_SETTINGS = {
     { "type": "header", "content": "Offer Settings"  },
     { "type": "text", "id": "description", "label": "Description", "default": "desc", "info":"Small text to add user-friendly details to the Offer. We recommend including details like the type of data the user is trading and participation requirements (like 10% off your next purchase of $10 or more)." },
     { "type": "image_picker", "id": "offerImage", "label": "Offer image", "info":"A 300 x 86 resolution image that ilustrates the offer. We've elected to make this portion of the UI an image so you can get as fancy/detailed as you'd like. We strongly recommend the image to be compelling, easy to understand, and focused on the incentive for the user to participate (hence, why it's called the reward image). The reward always goes hand in hand with the text Description (like a caption), so avoid over crowding it with too much text." },
-    {
-        "type": "select",
-        "id": "bullet1",
-        "label": "First Bullet",
-        "options": [
-            {
-                "value": "{ text: \"bullet 1\", isUsed: true }",
-                "label": "bullet 1"
-            },
-            {
-                "value": "{ text: \"bullet 1 not\", isUsed: false }",
-                "label": "bullet 1 not"
-            },
-            {
-                "value": "{ text: \"bullet 1 not 2\", isUsed: false }",
-                "label": "bullet 1 not 2"
-            }
-        ],
-        "default": "{ text: \"bullet 1\", isUsed: true }"
-    },
-        {
-        "type": "select",
-        "id": "bullet2",
-        "label": "Second Bullet",
-        "options": [
-            {
-                "value": "{ text: \"bullet 2\", isUsed: true }",
-                "label": "bullet 2"
-            },
-            {
-                "value": "{ text: \"bullet 2 not\", isUsed: false }",
-                "label": "bullet 2 not"
-            },
-            {
-                "value": "{ text: \"bullet 2 not 2\", isUsed: false }",
-                "label": "bullet 2 not 2"
-            }
-        ],
-        "default": "{ text: \"bullet 2\", isUsed: true }"
-    },
-    {
-        "type": "select",
-        "id": "bullet3",
-        "label": "Third Bullet",
-        "options": [
-            {
-                "value": "{ text: \"bullet 3\", isUsed: true }",
-                "label": "bullet 3"
-            },
-            {
-                "value": "{ text: \"bullet 3 not\", isUsed: false }",
-                "label": "bullet 3 not"
-            },
-            {
-                "value": "{ text: \"bullet 3 not 2\", isUsed: false }",
-                "label": "bullet 3 not 2"
-            }
-        ],
-        "default": "{ text: \"bullet 3\", isUsed: true }"
-    },
-    { "type": "richtext", "id": "terms", "label": "Terms", "default": "", "info":"The terms and conditions URL for this offer agreement. It should be a URL to a plain text file containing the legal conditions. This file can include simple markdown format." }
+    { "type": "richtext", "id": "terms", "label": "Terms", "default": "<p></p>", "info":"The terms and conditions URL for this offer agreement. It should be a URL to a plain text file containing the legal conditions. This file can include simple markdown format." }
   ]
 }
 {% endschema %}
