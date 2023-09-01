@@ -12,49 +12,49 @@ window.addEventListener('load', async (event) => {
       .initialize(TIKI_SETTINGS.publishingId, customerId)
     const tikiDecisionCookie = document.cookie.match(/(?:^|;\s*)tiki_decision=([^;]*)/)
     if (tikiDecisionCookie) {
-        tikiHandleDecision()
+      tikiHandleDecision()
     } else {
-        // const title = await TikiSdk.Trail.Title.getByPtr(customerId.toString())
-        // if (title) {
-        //     const license = await TikiSdk.Trail.License.getLatest(title.id)
-        //      if(license){
-        //         console.log("The user has a valid License. Banner will not be shown.")
-        //         return
-        //      }
-        // }
-        tikiAnon()
+      // const title = await TikiSdk.Trail.Title.getByPtr(customerId.toString())
+      // if (title) {
+      //     const license = await TikiSdk.Trail.License.getLatest(title.id)
+      //      if(license){
+      //         console.log("The user has a valid License. Banner will not be shown.")
+      //         return
+      //      }
+      // }
+      tikiAnon()
     }
   } else {
     if (!Shopify.designMode || TIKI_SETTINGS.UI.preview === 'true') {
-        const tikiDecisionCookie = document.cookie.match(/(?:^|;\s*)tiki_decision=([^;]*)/)
-        if (!tikiDecisionCookie) {
-            tikiSdkConfig().add()
-            tikiAnon()
-        }
+      const tikiDecisionCookie = document.cookie.match(/(?:^|;\s*)tiki_decision=([^;]*)/)
+      if (!tikiDecisionCookie) {
+        tikiSdkConfig().add()
+        tikiAnon()
+      }
     }
   }
 })
 
 const tikiGetOrCreateTitle = async (offer) => {
-    let title = await TikiSdk.Trail.Title.getByPtr(offer._ptr)
-    if (!title) {
-        title = await TikiSdk.Trail.Title.create(
-            offer._ptr,
-            offer._tags,
-            "desc"
-        )
-    }
-    return title
+  let title = await TikiSdk.Trail.Title.getByPtr(offer._ptr)
+  if (!title) {
+    title = await TikiSdk.Trail.Title.create(
+      offer._ptr,
+      offer._tags,
+      "desc"
+    )
+  }
+  return title
 }
 
 const tikiAnon = () => {
-    if(TIKI_SETTINGS.discount &&  document.getElementById(tikiId) == null) {
-        const div = document.createElement('div')
-        div.id = tikiId
-        div.appendChild(tikiAnonCreateOverlay())
-        document.body.appendChild(div)
-        tikiAnonGoTo('prompt')
-    }
+  if (TIKI_SETTINGS.discount && document.getElementById(tikiId) == null) {
+    const div = document.createElement('div')
+    div.id = tikiId
+    div.appendChild(tikiAnonCreateOverlay())
+    document.body.appendChild(div)
+    tikiAnonGoTo('prompt')
+  }
 }
 
 const tikiAnonGoTo = async (step) => {
@@ -72,7 +72,7 @@ const tikiAnonGoTo = async (step) => {
           tikiAnonGoTo('terms')
         },
         () => {
-          if (!Shopify.designMode){
+          if (!Shopify.designMode) {
             tikiHandleDecision(false)
           }
           offerPrompt.remove()
@@ -101,7 +101,7 @@ const tikiAnonGoTo = async (step) => {
           isHtml: true
         },
         async () => {
-          if (!Shopify.designMode){
+          if (!Shopify.designMode) {
             tikiHandleDecision(true)
           }
           terms.remove()
@@ -132,7 +132,7 @@ const tikiAnonCreateOverlay = () => {
 }
 
 const tikiSdkConfig = () => {
-    return TikiSdk.config()
+  return TikiSdk.config()
     .theme
     .primaryTextColor(TIKI_SETTINGS.UI.primaryTextColor)
     .secondaryTextColor(TIKI_SETTINGS.UI.secondaryTextColor)
@@ -153,62 +153,62 @@ const tikiSdkConfig = () => {
 }
 
 const tikiHandleDecision = async (accepted) => {
-    const customerId = __st.a
-    if(!customerId){
-        const expiry = new Date();
-        expiry.setFullYear(expiry.getFullYear() + 1);
-        document.cookie = `tiki_decision=true; expires=${expiry.toUTCString()}; path=/`;
-    }else{
-        const offer = TikiSdk.config()._offers[0]
-        let title = await tikiGetOrCreateTitle(offer)
-        let license = await TikiSdk.Trail.License.create(
-            title.id,
-            accepted ? offer._uses : [],
-            offer._terms.src,
-            offer._description,
-            offer._expiry
-        )
-        if(accepted){
-            const payable = await TikiSdk.Trail.Payable.create(
-                license.id,
-                TIKI_SETTINGS.discount.amount.toString(),
-                TIKI_SETTINGS.discount.type,
-                TIKI_SETTINGS.discount.description,
-                TIKI_SETTINGS.discount.expiry,
-                TIKI_SETTINGS.discount.reference,
-            )
-            if(payable){
-                tikiSaveCustomerDiscount(customerId, TIKI_SETTINGS.discount.reference)
-            }
-        }
+  const customerId = __st.a
+  if (!customerId) {
+    const expiry = new Date();
+    expiry.setFullYear(expiry.getFullYear() + 1);
+    document.cookie = `tiki_decision=true; expires=${expiry.toUTCString()}; path=/`;
+  } else {
+    const offer = TikiSdk.config()._offers[0]
+    let title = await tikiGetOrCreateTitle(offer)
+    let license = await TikiSdk.Trail.License.create(
+      title.id,
+      accepted ? offer._uses : [],
+      offer._terms.src,
+      offer._description,
+      offer._expiry
+    )
+    if (accepted) {
+      const payable = await TikiSdk.Trail.Payable.create(
+        license.id,
+        TIKI_SETTINGS.discount.amount.toString(),
+        TIKI_SETTINGS.discount.type,
+        TIKI_SETTINGS.discount.description,
+        TIKI_SETTINGS.discount.expiry,
+        TIKI_SETTINGS.discount.reference,
+      )
+      if (payable) {
+        tikiSaveCustomerDiscount(customerId, TIKI_SETTINGS.discount.reference)
+      }
     }
+  }
 }
 
 const tikiSaveCustomerDiscount = async (customerId, discountId) => {
-    const shop = Shopify.shop
-    const customerDiscountBody = JSON.stringify({
-        shop,
-        customerId,
-        discountId,
-    })
-    const authToken = await TikiSdk.IDP.Auth.token()
-    const xTikiAddress = TikiSdk.Trail.address()
-    const customerDiscountByteArray = new TextEncoder('utf8').encode(customerDiscountBody) 
-    const xTikiAddressSigUint = await TikiSdk.IDP.Key.sign(customerId, customerDiscountByteArray)
-    const xTikiAddressSig = b64Encode(xTikiAddressSigUint)
-    const headers = {
-        'Authorization': `Bearer ${authToken.accessToken}`, 
-        'X-Tiki-Address': xTikiAddress,
-        'X-Tiki-Signature': xTikiAddressSig
-    }
-    fetch(`https://tiki.shopify.brgweb.com.br/api/latest/customer/discount`, {
-		method: 'POST',
-		headers,
-        body: customerDiscountBody
-	})
-		.then(response => response.text())
-		.then(response => console.log(`Discount saved! ${response}`))
-		.catch(err => console.error(err));
+  const shop = Shopify.shop
+  const customerDiscountBody = JSON.stringify({
+    shop,
+    customerId,
+    discountId,
+  })
+  const authToken = await TikiSdk.IDP.Auth.token()
+  const xTikiAddress = TikiSdk.Trail.address()
+  const customerDiscountByteArray = new TextEncoder('utf8').encode(customerDiscountBody)
+  const xTikiAddressSigUint = await TikiSdk.IDP.Key.sign(customerId, customerDiscountByteArray)
+  const xTikiAddressSig = b64Encode(xTikiAddressSigUint)
+  const headers = {
+    'Authorization': `Bearer ${authToken.accessToken}`,
+    'X-Tiki-Address': xTikiAddress,
+    'X-Tiki-Signature': xTikiAddressSig
+  }
+  fetch(`https://intg-shpfy.pages.dev/api/latest/customer/discount`, {
+    method: 'POST',
+    headers,
+    body: customerDiscountBody
+  })
+    .then(response => response.text())
+    .then(response => console.log(`Discount saved! ${response}`))
+    .catch(err => console.error(err));
 }
 
 const b64Encode = (bytes) => btoa(bytes.reduce((acc, current) => acc + String.fromCharCode(current), ""));
