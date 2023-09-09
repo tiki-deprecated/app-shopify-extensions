@@ -4,17 +4,16 @@ const tikiId = 'tiki-offer'
 const tikiOverlayId = 'tiki-offer-overlay'
 
 window.addEventListener('load', async (event) => {
-  const customerId = __st.a
-  if (customerId) {
+  if (TIKI_SETTINGS.customerId) {
     await tikiSdkConfig()
-      .ptr(customerId.toString())
+      .ptr(TIKI_SETTINGS.customerId.toString())
       .add()
-      .initialize(TIKI_SETTINGS.publishingId, customerId)
+      .initialize(TIKI_SETTINGS.publishingId, TIKI_SETTINGS.customerId)
     const tikiDecisionCookie = document.cookie.match(/(?:^|;\s*)tiki_decision=([^;]*)/)
     if (tikiDecisionCookie) {
       tikiHandleDecision()
     } else {
-      // const title = await TikiSdk.Trail.Title.getByPtr(customerId.toString())
+      // const title = await TikiSdk.Trail.Title.getByPtr(TIKI_SETTINGS.customerId.toString())
       // if (title) {
       //     const license = await TikiSdk.Trail.License.getLatest(title.id)
       //      if(license){
@@ -153,8 +152,7 @@ const tikiSdkConfig = () => {
 }
 
 const tikiHandleDecision = async (accepted) => {
-  const customerId = __st.a
-  if (!customerId) {
+  if (!TIKI_SETTINGS.customerId) {
     const expiry = new Date();
     expiry.setFullYear(expiry.getFullYear() + 1);
     document.cookie = `tiki_decision=true; expires=${expiry.toUTCString()}; path=/`;
@@ -178,7 +176,7 @@ const tikiHandleDecision = async (accepted) => {
         TIKI_SETTINGS.discount.reference,
       )
       if (payable) {
-        tikiSaveCustomerDiscount(customerId, TIKI_SETTINGS.discount.reference)
+        tikiSaveCustomerDiscount(TIKI_SETTINGS.customerId, TIKI_SETTINGS.discount.reference)
       }
     }
   }
@@ -194,7 +192,7 @@ const tikiSaveCustomerDiscount = async (customerId, discountId) => {
   const authToken = await TikiSdk.IDP.Auth.token()
   const xTikiAddress = TikiSdk.Trail.address()
   const customerDiscountByteArray = new TextEncoder('utf8').encode(customerDiscountBody)
-  const xTikiAddressSigUint = await TikiSdk.IDP.Key.sign(customerId, customerDiscountByteArray)
+  const xTikiAddressSigUint = await TikiSdk.IDP.Key.sign(TIKI_SETTINGS.customerId, customerDiscountByteArray)
   const xTikiAddressSig = b64Encode(xTikiAddressSigUint)
   const headers = {
     'Authorization': `Bearer ${authToken.accessToken}`,
