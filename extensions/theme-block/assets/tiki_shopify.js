@@ -47,7 +47,8 @@ const tikiGetOrCreateTitle = async (offer) => {
 }
 
 const tikiAnon = () => {
-  if (TIKI_SETTINGS.discount && document.getElementById(tikiId) == null) {
+  const tikiLicencedCookie = document.cookie.match(/(?:^|;\s*)tiki_licensed=([^;]*)/)
+  if (TIKI_SETTINGS.discount && document.getElementById(tikiId) == null && !tikiLicencedCookie) {
     const div = document.createElement('div')
     div.id = tikiId
     div.appendChild(tikiAnonCreateOverlay())
@@ -157,28 +158,28 @@ const tikiHandleDecision = async (accepted) => {
     expiry.setFullYear(expiry.getFullYear() + 1);
     document.cookie = `tiki_decision=true; expires=${expiry.toUTCString()}; path=/`;
   } else {
-    const offer = TikiSdk.config()._offers[0]
-    let title = await tikiGetOrCreateTitle(offer)
-    let license = await TikiSdk.Trail.License.create(
-      title.id,
-      accepted ? offer._uses : [],
-      offer._terms.src,
-      offer._description,
-      offer._expiry
-    )
-    if (accepted) {
-      const payable = await TikiSdk.Trail.Payable.create(
-        license.id,
-        TIKI_SETTINGS.discount.amount.toString(),
-        TIKI_SETTINGS.discount.type,
-        TIKI_SETTINGS.discount.description,
-        TIKI_SETTINGS.discount.expiry,
-        TIKI_SETTINGS.discount.reference,
+      const offer = TikiSdk.config()._offers[0]
+      let title = await tikiGetOrCreateTitle(offer)
+      let license = await TikiSdk.Trail.License.create(
+        title.id,
+        accepted ? offer._uses : [],
+        offer._terms.src,
+        offer._description,
+        offer._expiry
       )
-      if (payable) {
-        tikiSaveCustomerDiscount(TIKI_SETTINGS.customerId, TIKI_SETTINGS.discount.reference)
+      if (accepted) {
+        const payable = await TikiSdk.Trail.Payable.create(
+          license.id,
+          TIKI_SETTINGS.discount.amount.toString(),
+          TIKI_SETTINGS.discount.type,
+          TIKI_SETTINGS.discount.description,
+          TIKI_SETTINGS.discount.expiry,
+          TIKI_SETTINGS.discount.reference,
+        )
+        if (payable) {
+          tikiSaveCustomerDiscount(TIKI_SETTINGS.customerId, TIKI_SETTINGS.discount.reference)
+        }
       }
-    }
   }
 }
 
@@ -205,7 +206,12 @@ const tikiSaveCustomerDiscount = async (customerId, discountId) => {
     body: customerDiscountBody
   })
     .then(response => response.text())
-    .then(response => console.log(`Discount saved! ${response}`))
+    .then(response => {
+      console.log(`Discount saved! ${response}`)
+      const expiry = new Date();
+      expiry.setFullYear(expiry.getFullYear() + 1);
+      document.cookie = `tiki_licensed=true; expires=${expiry.toUTCString()}; path=/`;
+    })
     .catch(err => console.error(err));
 }
 
