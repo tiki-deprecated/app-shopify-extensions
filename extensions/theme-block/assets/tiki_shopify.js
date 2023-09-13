@@ -13,14 +13,16 @@ window.addEventListener('load', async (event) => {
     if (tikiDecisionCookie) {
       tikiHandleDecision()
     } else {
-      // const title = await TikiSdk.Trail.Title.getByPtr(TIKI_SETTINGS.customerId.toString())
-      // if (title) {
-      //     const license = await TikiSdk.Trail.License.getLatest(title.id)
-      //      if(license){
-      //         console.log("The user has a valid License. Banner will not be shown.")
-      //         return
-      //      }
-      // }
+      const urlParams = new URLSearchParams(window.location.search);
+      const debugParam = urlParams.get('debugBanner');
+      const title = await TikiSdk.Trail.Title.getByPtr(TIKI_SETTINGS.customerId.toString())
+      if (title && !debugParam) {
+          const license = await TikiSdk.Trail.License.getLatest(title.id)
+           if(license){
+              console.log("The user has a valid License. Banner will not be shown.")
+              return
+           }
+      }
       tikiAnon()
     }
   } else {
