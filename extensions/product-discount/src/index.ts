@@ -72,8 +72,8 @@ const setTargets = (input: InputQuery, discountMeta: ShopifyDiscountMeta) => {
             {productVariant: productVariantTgt}
         )
        }
-       if( line.quantity! < minQty ||
-            line?.cost.subtotalAmount?.amount < minValue){
+       if( line.quantity! <= minQty ||
+            line?.cost.subtotalAmount?.amount <= minValue){
             throw Error ('Error in Min Value/Min Discount') 
         }
 
