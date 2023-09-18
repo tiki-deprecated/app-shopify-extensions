@@ -3,34 +3,51 @@
 const tikiId = 'tiki-offer'
 const tikiOverlayId = 'tiki-offer-overlay'
 
+const isLoggedIn = () => TIKI_SETTINGS.customerId == true
+
+const getDecisionStep = () => document.cookie.match(/(?:^|;\s*)tiki_decision=([^;]*)/)[1]
+const setDecisionStep = (step) => {
+  const expiry = new Date();
+  expiry.setFullYear(expiry.getFullYear() + 1);
+  document.cookie = `tiki_decision=${step}; expires=${expiry.toUTCString()}; path=/`;
+}
+const clearDecisionStep = () => {
+  const expiry = new Date();
+  expiry.setFullYear(expiry.getFullYear() - 1);
+  document.cookie = `tiki_decision=true; expires=${expiry.toUTCString()}; path=/`;
+}
+
+const getLicenseCookie = () => document.cookie.match(/(?:^|;\s*)tiki_license=([^;]*)/)[1]
+const setLicenseCookie = () => {
+  const expiry = new Date();
+  expiry.setFullYear(expiry.getFullYear() + 1);
+  document.cookie = `tiki_licensed=true; expires=${expiry.toUTCString()}; path=/`;
+}
+const clearLicenseCookie = () => {
+  const expiry = new Date();
+  expiry.setFullYear(expiry.getFullYear() - 1);
+  document.cookie = `tiki_licensed=true; expires=${expiry.toUTCString()}; path=/`;
+}
+
 window.addEventListener('load', async (event) => {
-  if (TIKI_SETTINGS.customerId) {
-    await tikiSdkConfig()
-      .ptr(TIKI_SETTINGS.customerId.toString())
-      .add()
-      .initialize(TIKI_SETTINGS.publishingId, TIKI_SETTINGS.customerId)
-    const tikiDecisionCookie = document.cookie.match(/(?:^|;\s*)tiki_decision=([^;]*)/)
-    if (tikiDecisionCookie) {
-      tikiHandleDecision()
-    } else {
-      const urlParams = new URLSearchParams(window.location.search);
-      const debugParam = urlParams.get('debugBanner');
-      const title = await TikiSdk.Trail.Title.getByPtr(TIKI_SETTINGS.customerId.toString())
-      if (title && !debugParam) {
-          const license = await TikiSdk.Trail.License.getLatest(title.id)
-           if(license){
-              console.log("The user has a valid License. Banner will not be shown.")
-              return
-           }
-      }
-      tikiAnon()
+  const decisionStep = getDecisionStep();
+  const licenseCookie = getLicenseCookie();
+
+  if (TIKI_SETTINGS.UI.preview === 'true') {
+    tikiSdkConfig().add()
+    showBanner()
+    return
+  }
+
+  if (!decisionStep && (!licenseCookie || !isLoggedIn())) {
+    showBanner();
+    if (licenseCookie) {
+      clearLicenseCookie();
     }
-  } else {
-    if (!Shopify.designMode || TIKI_SETTINGS.UI.preview === 'true') {
-      const tikiDecisionCookie = document.cookie.match(/(?:^|;\s*)tiki_decision=([^;]*)/)
-      if (!tikiDecisionCookie) {
-        tikiSdkConfig().add()
-        tikiAnon()
+  }else{
+    if(decisionStep !== 'declined'){
+      if(!isLoggedIn()){
+        tikiHandleDecision(decisionStep)
       }
     }
   }
@@ -48,18 +65,18 @@ const tikiGetOrCreateTitle = async (offer) => {
   return title
 }
 
-const tikiAnon = () => {
+const showBanner = () => {
   const tikiLicencedCookie = document.cookie.match(/(?:^|;\s*)tiki_licensed=([^;]*)/)
   if (TIKI_SETTINGS.discount && document.getElementById(tikiId) == null && !tikiLicencedCookie) {
     const div = document.createElement('div')
     div.id = tikiId
-    div.appendChild(tikiAnonCreateOverlay())
+    div.appendChild(showBannerCreateOverlay())
     document.body.appendChild(div)
-    tikiAnonGoTo('prompt')
+    showBannerGoTo('prompt')
   }
 }
 
-const tikiAnonGoTo = async (step) => {
+const showBannerGoTo = async (step) => {
   switch (step) {
     case 'none': {
       const element = document.getElementById(tikiId)
@@ -71,7 +88,7 @@ const tikiAnonGoTo = async (step) => {
         TikiSdk.config()._offers[0],
         () => {
           offerPrompt.remove()
-          tikiAnonGoTo('terms')
+          showBannerGoTo('terms')
         },
         () => {
           if (!Shopify.designMode) {
@@ -81,19 +98,19 @@ const tikiAnonGoTo = async (step) => {
         },
         () => {
           offerPrompt.remove()
-          tikiAnonGoTo('learnMore')
+          showBannerGoTo('learnMore')
         },
         TikiSdk.config().activeTheme
       )
-      tikiAnonShowScreen(offerPrompt)
+      showBannerShowScreen(offerPrompt)
       break
     }
     case 'learnMore': {
       const learnMore = TikiSdk.UI.Screen.LearnMore.create(() => {
         learnMore.remove()
-        tikiAnonGoTo('prompt')
+        showBannerGoTo('prompt')
       }, TikiSdk.config().activeTheme)
-      tikiAnonShowScreen(learnMore)
+      showBannerShowScreen(learnMore)
       break
     }
     case 'terms': {
@@ -110,25 +127,25 @@ const tikiAnonGoTo = async (step) => {
         },
         () => {
           terms.remove()
-          tikiAnonGoTo('prompt')
+          showBannerGoTo('prompt')
         },
         TikiSdk.config().activeTheme
       )
-      tikiAnonShowScreen(terms)
+      showBannerShowScreen(terms)
       break
     }
   }
 }
 
-const tikiAnonShowScreen = (screen) => {
+const showBannerShowScreen = (screen) => {
   const div = document.getElementById(tikiId)
   if (div != null) {
     div.appendChild(screen)
   }
 }
 
-const tikiAnonCreateOverlay = () => {
-  const overlay = TikiSdk.UI.Element.Overlay.create(() => tikiAnonGoTo('none'))
+const showBannerCreateOverlay = () => {
+  const overlay = TikiSdk.UI.Element.Overlay.create(() => showBannerGoTo('none'))
   overlay.id = tikiOverlayId
   return overlay
 }
@@ -154,14 +171,17 @@ const tikiSdkConfig = () => {
     .use({ usecases: [TikiSdk.Trail.License.LicenseUsecase.attribution()], destinations: ['*'] })
 }
 
-const tikiHandleDecision = async (accepted) => {
-  if (!TIKI_SETTINGS.customerId) {
-    const expiry = new Date();
-    expiry.setFullYear(expiry.getFullYear() + 1);
-    document.cookie = `tiki_decision=true; expires=${expiry.toUTCString()}; path=/`;
-  } else {
-      const offer = TikiSdk.config()._offers[0]
+const tikiHandleDecision = async (step) => {
+  await tikiSdkConfig()
+    .ptr(TIKI_SETTINGS.customerId.toString())
+    .add()
+    .initialize(TIKI_SETTINGS.publishingId, TIKI_SETTINGS.customerId)
+  const offer = TikiSdk.config()._offers[0]
+  switch(step){
+    case 'title' :
       let title = await tikiGetOrCreateTitle(offer)
+      setDecisionStep('license')
+    case 'license' :
       let license = await TikiSdk.Trail.License.create(
         title.id,
         accepted ? offer._uses : [],
@@ -169,19 +189,22 @@ const tikiHandleDecision = async (accepted) => {
         offer._description,
         offer._expiry
       )
-      if (accepted) {
-        const payable = await TikiSdk.Trail.Payable.create(
-          license.id,
-          TIKI_SETTINGS.discount.amount.toString(),
-          TIKI_SETTINGS.discount.type,
-          TIKI_SETTINGS.discount.description,
-          TIKI_SETTINGS.discount.expiry,
-          TIKI_SETTINGS.discount.reference,
-        )
-        if (payable) {
-          tikiSaveCustomerDiscount(TIKI_SETTINGS.customerId, TIKI_SETTINGS.discount.reference)
-        }
-      }
+      setDecisionStep('payable')
+    case 'payable':
+      await TikiSdk.Trail.Payable.create(
+        license.id,
+        TIKI_SETTINGS.discount.amount.toString(),
+        TIKI_SETTINGS.discount.type,
+        TIKI_SETTINGS.discount.description,
+        TIKI_SETTINGS.discount.expiry,
+        TIKI_SETTINGS.discount.reference,
+      )
+      setDecisionStep('save')
+    case 'save':
+      await tikiSaveCustomerDiscount(TIKI_SETTINGS.customerId, TIKI_SETTINGS.discount.reference)
+      setLicenseCookie()
+    default:
+      clearDecisionStep()
   }
 }
 
