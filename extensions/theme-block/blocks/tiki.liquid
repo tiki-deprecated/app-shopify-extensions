@@ -47,7 +47,7 @@ const TIKI_SETTINGS = {
     },
     discount: {{ app.metafields.mytiki.discount | default: undefined }},
     publishingId: "{{ app.metafields.mytiki.public_key_id }}",
-    customerId : "{{customer.id}}"
+    customerId : "{{ customer.id }}"
 }
 </script>
 <script async src="{{ 'tiki_shopify.js' | asset_url }}"></script>
