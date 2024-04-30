@@ -1,3 +1,33 @@
 # Reference: https://github.com/repository-settings/app
+
 _extends: .github
 
+repository:
+  name: app-shopify-extensions
+  description: Integrate mytiki.com with your Shopify Store
+  homepage: https://mytiki.com
+  topics: shopify, extensions
+  private: false
+  has_projects: true
+  has_discussions: false
+  has_issues: true
+
+teams:
+  - name: sysadmin
+    permission: admin
+  - name: engineering
+    permission: push
+  - name: product
+    permission: triage
+  - name: frontend
+    permission: push
+
+environments:
+  - name: production
+
+branches:
+  - name: main
+    protection:
+      required_status_checks:
+        strict: true
+        contexts: []
