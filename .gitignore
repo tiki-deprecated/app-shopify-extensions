@@ -27,5 +27,6 @@ extensions/*/build
 # Node library SQLite database
 web/database.sqlite
 
-# VS Code
+# IDE
 .vscode
+.idea
