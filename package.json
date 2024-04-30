@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@shopify/app": "^3.50.0",
-    "@shopify/cli": "^3.50.0",
+    "@shopify/cli": "^3.59.1",
     "@shopify/shopify_function": "^0.0.3"
   },
   "author": "TIKI Inc",
